@@ -11,7 +11,30 @@ import authRouter from './routes/auth.routes.js';
 import cookieParser from 'cookie-parser';
 import { authenticationMiddleware } from './middlewares/authentication.js';
 import userRouter from './routes/user.routes.js';
+import helmet from "helmet";
+import xss from "xss-clean";
+import rateLimit from "express-rate-limit";
+import express_mongo_sanitize from "express-mongo-sanitize";
+import cors from "cors";
 const app = express();
+
+app.set("trust proxy", 1);
+app.use(
+  rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+  })
+);
+app.use(helmet());
+app.use(xss());
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      callback(null, origin || "*");
+    },
+    credentials: true,
+  })
+);
+app.use(express_mongo_sanitize()); 
 
 // MIDDLEWARES
 app.use(express.static('public'))
