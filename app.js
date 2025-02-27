@@ -1,6 +1,6 @@
 import 'express-async-errors';
 import 'dotenv/config';
-import express from 'express';
+import express, { response } from 'express';
 import morgan from 'morgan';
 import notFoundMiddleware from './middlewares/not-found.js';
 import errorHanlderMiddleware from './middlewares/error-handler.js';
@@ -16,6 +16,7 @@ import xss from "xss-clean";
 import rateLimit from "express-rate-limit";
 import express_mongo_sanitize from "express-mongo-sanitize";
 import cors from "cors";
+import path from 'path';
 const app = express();
 
 app.set("trust proxy", 1);
@@ -37,7 +38,7 @@ app.use(
 app.use(express_mongo_sanitize()); 
 
 // MIDDLEWARES
-app.use(express.static('public'))
+app.use(express.static(path.resolve('public')))
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
 if(process.env.NODE_ENV === 'development') { 
@@ -49,17 +50,8 @@ app.use('/api/v1/user', authenticationMiddleware, userRouter)
 //job router
 app.use('/api/v1/jobs', authenticationMiddleware, jobRouter);
 
-app.post('/api/v1/test', validateTest,(req, res) => {
-    const {name} = req.body;
-    console.log({
-        message: `Hello ${name}!`,
-        timestamp: new Date().toISOString(),
-    });
-    
-    res.send({
-        message: `Hello ${name}!`,
-        timestamp: new Date().toISOString(),
-    });
+app.get('/api/v1/test', (req, res) => {
+    return  res.send('<h1>TEST</h1>')
 });
 
 //CUSTOM MIDDLEWARES
